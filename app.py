@@ -59,17 +59,21 @@ while True:
 
         print(file_name, file_size)
         if file_size < 250 * 1024 * 1024 and 'b' <= file_name[0].lower() <= 'z':  # Convert MB to bytes
-            request = service.files().get_media(fileId=file['id'])
-            fh = io.BytesIO()
-            downloader = MediaIoBaseDownload(fh, request)
-            done = False
-            while not done:
-                status, done = downloader.next_chunk()
-            with open(file_name, 'wb') as f:
-                f.write(fh.getvalue())
-            print(f"Downloaded '{file_name}' with size {file_size/1024} MB.")
-            client.loop.run_until_complete(send_file(file_name))
-            os.remove(file_name)
+            try:
+                request = service.files().get_media(fileId=file['id'])
+                fh = io.BytesIO()
+                downloader = MediaIoBaseDownload(fh, request)
+                done = False
+                while not done:
+                    status, done = downloader.next_chunk()
+                with open(file_name, 'wb') as f:
+                    f.write(fh.getvalue())
+                print(f"Downloaded '{file_name}' with size {file_size/1024} MB.")
+                client.loop.run_until_complete(send_file(file_name))
+                os.remove(file_name)
+            except:
+                print("skipped due to binary issue")
+           
         else:
             print(f"Skipping '{file_name}' due to its large size ({file_size} bytes).")
                 
